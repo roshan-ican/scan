@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="120" fill="#1b1d1f"/>
+  <!-- Receipt outline -->
+  <path d="M160 110 h192 a16 16 0 0 1 16 16 v260 l-24 -16 l-24 16 l-24 -16 l-24 16 l-24 -16 l-24 16 l-24 -16 l-24 16 l-24 -16 v-260 a16 16 0 0 1 16 -16 z" fill="#f8fafc" stroke="#e2e8f0" stroke-width="8"/>
+  <!-- Receipt header line -->
+  <rect x="200" y="160" width="112" height="18" rx="9" fill="#1b1d1f"/>
+  <!-- Receipt lines -->
+  <rect x="190" y="210" width="132" height="12" rx="6" fill="#94a3b8"/>
+  <rect x="190" y="240" width="90" height="12" rx="6" fill="#cbd5e1"/>
+  <rect x="190" y="270" width="132" height="12" rx="6" fill="#cbd5e1"/>
+  <!-- Grand total emphasis -->
+  <rect x="190" y="310" width="132" height="20" rx="8" fill="#1d5fd6"/>
+</svg>

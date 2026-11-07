@@ -1,0 +1,34 @@
+{
+  "name": "Expense Tracker",
+  "short_name": "Expenses",
+  "description": "Fast iPhone-first expense tracker with one-tap Type and AI Receipt Scan powered by Gemini.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f3f5f7",
+  "theme_color": "#1b1d1f",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Scan Receipt",
+      "short_name": "Scan",
+      "description": "Scan a receipt using camera",
+      "url": "/scan",
+      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Type Expense",
+      "short_name": "Type",
+      "description": "Quickly type an expense with keypad",
+      "url": "/add",
+      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
+    }
+  ]
+}

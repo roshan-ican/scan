@@ -1,0 +1,56 @@
+@import "@fontsource/manrope/400.css";
+@import "@fontsource/manrope/500.css";
+@import "@fontsource/manrope/600.css";
+@import "@fontsource/manrope/700.css";
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --color-ground: #f3f5f7;
+  --color-surface: #ffffff;
+  --color-raised: #f2f8fd;
+  --color-border: #e6e6e6;
+  --color-text: #1b1d1f;
+  --color-muted: #5c6064;
+  --color-accent: #1d5fd6;
+  --color-positive: #2f7a45;
+  --radius-card: 20px;
+  --radius-control: 10px;
+}
+
+.dark {
+  --color-ground: #111214;
+  --color-surface: #1a1b1e;
+  --color-raised: #222428;
+  --color-border: #2c2e33;
+  --color-text: #f3f5f7;
+  --color-muted: #9ca1a8;
+  --color-accent: #4b86f0;
+  --color-positive: #48a665;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  html, body {
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--color-ground);
+    color: var(--color-text);
+    min-height: 100%;
+    overscroll-behavior-y: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Safe area utility helpers */
+  .pb-safe {
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+  .pt-safe {
+    padding-top: max(12px, env(safe-area-inset-top));
+  }
+}

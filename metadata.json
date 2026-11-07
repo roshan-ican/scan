@@ -1,0 +1,6 @@
+{
+  "name": "Expense Tracker",
+  "description": "Fast iPhone-first expense tracker with one-tap Type and AI Receipt Scan powered by Gemini.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
