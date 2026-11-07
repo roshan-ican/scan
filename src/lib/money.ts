@@ -6,6 +6,7 @@ export interface FormattedMoney {
 }
 
 export const SUPPORTED_CURRENCIES = [
+  { code: 'AED', symbol: 'AED', label: 'UAE Dirham (AED)' },
   { code: 'INR', symbol: '₹', label: 'Indian Rupee (₹)' },
   { code: 'USD', symbol: '$', label: 'US Dollar ($)' },
   { code: 'EUR', symbol: '€', label: 'Euro (€)' },
@@ -15,6 +16,39 @@ export const SUPPORTED_CURRENCIES = [
   { code: 'AUD', symbol: 'AU$', label: 'Australian Dollar (AU$)' },
 ];
 
+/** Currency used when nothing is chosen and the region is unknown. */
+export const FALLBACK_CURRENCY = 'AED';
+
+const EURO_REGIONS = ['AT', 'BE', 'CY', 'DE', 'EE', 'ES', 'FI', 'FR', 'GR', 'HR', 'IE', 'IT', 'LT', 'LU', 'LV', 'MT', 'NL', 'PT', 'SI', 'SK'];
+
+/**
+ * Picks a starting currency from the device: its region (en-AE, en-IN, ...) and,
+ * because many phones in the UAE are set to en-US or en-GB, its time zone.
+ */
+export function detectDefaultCurrency(
+  locale: string = typeof navigator !== 'undefined' ? navigator.language : '',
+  timeZone: string = Intl.DateTimeFormat().resolvedOptions().timeZone || ''
+): string {
+  if (timeZone === 'Asia/Dubai') return 'AED';
+  if (timeZone === 'Asia/Kolkata' || timeZone === 'Asia/Calcutta') return '₹';
+
+  let region = '';
+  try {
+    region = (new Intl.Locale(locale).maximize().region || '').toUpperCase();
+  } catch {
+    region = (locale.split('-')[1] || '').toUpperCase();
+  }
+  if (region === 'AE') return 'AED';
+  if (region === 'IN') return '₹';
+  if (region === 'US') return '$';
+  if (region === 'GB') return '£';
+  if (region === 'JP') return '¥';
+  if (region === 'CA') return 'CA$';
+  if (region === 'AU') return 'AU$';
+  if (EURO_REGIONS.includes(region)) return '€';
+  return FALLBACK_CURRENCY;
+}
+
 export function getStoredCurrency(): string {
   try {
     const saved = localStorage.getItem('expense_currency');
@@ -22,7 +56,12 @@ export function getStoredCurrency(): string {
   } catch {
     // ignore
   }
-  return '₹';
+  return detectDefaultCurrency();
+}
+
+/** Symbol plus a space when it is letters ("AED 250"), none for signs ("₹250", "$18.50"). */
+export function currencyPrefix(symbol: string): string {
+  return /[A-Za-z]$/.test(symbol) ? `${symbol} ` : symbol;
 }
 
 export function setStoredCurrency(symbol: string): void {
@@ -33,7 +72,7 @@ export function setStoredCurrency(symbol: string): void {
   }
 }
 
-export function formatMoney(amount: number, symbol = '₹'): FormattedMoney {
+export function formatMoney(amount: number, symbol = FALLBACK_CURRENCY): FormattedMoney {
   const isNegative = amount < 0;
   const abs = Math.abs(amount);
   
@@ -42,12 +81,13 @@ export function formatMoney(amount: number, symbol = '₹'): FormattedMoney {
   const wholePart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   const decimalPart = `.${parts[1]}`;
   const prefix = isNegative ? '-' : '';
+  const sym = currencyPrefix(symbol);
 
   return {
     symbol,
-    whole: `${prefix}${symbol}${wholePart}`,
+    whole: `${prefix}${sym}${wholePart}`,
     decimal: decimalPart,
-    full: `${prefix}${symbol}${wholePart}${decimalPart}`,
+    full: `${prefix}${sym}${wholePart}${decimalPart}`,
   };
 }
 
@@ -59,7 +99,7 @@ export function formatMoney(amount: number, symbol = '₹'): FormattedMoney {
 export function calculateMonthComparison(
   currentMonthExpenses: { amount: number; createdAt: string }[],
   lastMonthExpenses: { amount: number; createdAt: string }[],
-  currency = '₹',
+  currency = FALLBACK_CURRENCY,
   now = new Date()
 ): { text: string; delta: number; isHigher: boolean } {
   const currentDay = now.getDate();

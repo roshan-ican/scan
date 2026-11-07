@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Expense } from '../db.ts';
 import { formatMoney, calculateMonthComparison } from '../lib/money.ts';
+import { localDateStr, monthKey, spendDate } from '../lib/expenseQuery.ts';
 import { CategoryBarList } from '../components/CategoryBarList.tsx';
 import { ExpenseRow } from '../components/ExpenseRow.tsx';
 import { Camera, Plus, ArrowRight, TrendingUp, TrendingDown } from 'lucide-react';
@@ -26,21 +27,15 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   const currentMonthName = now.toLocaleString('default', { month: 'long' });
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth();
-  const todayStr = now.toISOString().split('T')[0];
+  const todayStr = localDateStr(now);
 
-  // Current month expenses
-  const currentMonthExpenses = expenses.filter((e) => {
-    const d = new Date(e.createdAt);
-    return !isNaN(d.getTime()) && d.getFullYear() === currentYear && d.getMonth() === currentMonth;
-  });
+  // Every total uses spendDate (receipt date, else the local day recorded) so Home,
+  // History and the voice agent count each expense on the same day.
+  const currentMonthKey = monthKey(todayStr);
+  const priorMonthKey = monthKey(localDateStr(new Date(currentYear, currentMonth - 1, 1)));
 
-  // Prior month expenses
-  const priorMonth = currentMonth === 0 ? 11 : currentMonth - 1;
-  const priorYear = currentMonth === 0 ? currentYear - 1 : currentYear;
-  const priorMonthExpenses = expenses.filter((e) => {
-    const d = new Date(e.createdAt);
-    return !isNaN(d.getTime()) && d.getFullYear() === priorYear && d.getMonth() === priorMonth;
-  });
+  const currentMonthExpenses = expenses.filter((e) => monthKey(spendDate(e)) === currentMonthKey);
+  const priorMonthExpenses = expenses.filter((e) => monthKey(spendDate(e)) === priorMonthKey);
 
   // Month total
   const monthTotal = currentMonthExpenses.reduce((sum, e) => sum + e.amount, 0);
@@ -55,11 +50,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   );
 
   // Today's total
-  const todayExpenses = expenses.filter((e) => {
-    const d = new Date(e.createdAt);
-    const dateStr = e.receiptDate || (!isNaN(d.getTime()) ? d.toISOString().split('T')[0] : '');
-    return dateStr === todayStr;
-  });
+  const todayExpenses = expenses.filter((e) => spendDate(e) === todayStr);
   const todayTotal = todayExpenses.reduce((sum, e) => sum + e.amount, 0);
   const formattedTodayTotal = formatMoney(todayTotal, currency);
 

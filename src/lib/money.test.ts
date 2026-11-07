@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { formatMoney, calculateMonthComparison } from './money.ts';
+import { formatMoney, calculateMonthComparison, currencyPrefix, detectDefaultCurrency } from './money.ts';
 
 test('formats positive amounts with tabular split', () => {
   const result = formatMoney(1240.5, '₹');
@@ -54,4 +54,21 @@ test('handles first month tracking with no previous records', () => {
   );
   assert.equal(comp.text, 'First recorded month of spending');
   assert.equal(comp.delta, 0);
+});
+
+test('letter symbols get a space, sign symbols do not', () => {
+  assert.equal(formatMoney(1240.5, 'AED').full, 'AED 1,240.50');
+  assert.equal(formatMoney(-38, 'AED').whole, '-AED 38');
+  assert.equal(currencyPrefix('AED'), 'AED ');
+  assert.equal(currencyPrefix('₹'), '₹');
+  assert.equal(currencyPrefix('CA$'), 'CA$');
+});
+
+test('default currency follows the device region and time zone', () => {
+  assert.equal(detectDefaultCurrency('en-US', 'Asia/Dubai'), 'AED');
+  assert.equal(detectDefaultCurrency('ar-AE', 'UTC'), 'AED');
+  assert.equal(detectDefaultCurrency('en-IN', 'UTC'), '₹');
+  assert.equal(detectDefaultCurrency('en-GB', 'Europe/London'), '£');
+  assert.equal(detectDefaultCurrency('de-DE', 'Europe/Berlin'), '€');
+  assert.equal(detectDefaultCurrency('xx', 'UTC'), 'AED');
 });

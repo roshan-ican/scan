@@ -1,17 +1,19 @@
 import React from 'react';
-import { Home, History, Settings, Plus, Camera } from 'lucide-react';
+import { Home, History, Settings, Plus, Camera, Mic } from 'lucide-react';
 
-export type ScreenId = 'home' | 'history' | 'settings' | 'add' | 'scan';
+export type ScreenId = 'home' | 'history' | 'ask' | 'settings' | 'add' | 'scan';
 
 interface NavigationProps {
   currentScreen: ScreenId;
+  currency: string;
   onNavigate: (screen: ScreenId) => void;
 }
 
-export const Navigation: React.FC<NavigationProps> = ({ currentScreen, onNavigate }) => {
+export const Navigation: React.FC<NavigationProps> = ({ currentScreen, currency, onNavigate }) => {
   const tabs = [
     { id: 'home' as ScreenId, label: 'Home', icon: Home },
     { id: 'history' as ScreenId, label: 'History', icon: History },
+    { id: 'ask' as ScreenId, label: 'Ask', icon: Mic },
     { id: 'settings' as ScreenId, label: 'Settings', icon: Settings },
   ];
 
@@ -24,10 +26,10 @@ export const Navigation: React.FC<NavigationProps> = ({ currentScreen, onNavigat
           <button
             type="button"
             onClick={() => onNavigate('home')}
-            className="w-10 h-10 rounded-xl bg-[#1b1d1f] dark:bg-white text-white dark:text-[#1b1d1f] flex items-center justify-center font-bold text-lg shadow-sm"
+            className="w-10 h-10 rounded-xl bg-[#1b1d1f] dark:bg-white text-white dark:text-[#1b1d1f] flex items-center justify-center font-bold text-lg"
             aria-label="Home"
           >
-            ₹
+            <span className={currency.length > 1 ? 'text-xs tracking-tight' : ''}>{currency}</span>
           </button>
 
           {/* Navigation icons */}
@@ -41,14 +43,14 @@ export const Navigation: React.FC<NavigationProps> = ({ currentScreen, onNavigat
                   type="button"
                   onClick={() => onNavigate(tab.id)}
                   aria-label={tab.label}
-                  className={`w-12 h-12 flex flex-col items-center justify-center rounded-xl transition-colors cursor-pointer ${
+                  title={tab.label}
+                  className={`w-11 h-11 flex items-center justify-center rounded-xl transition-colors cursor-pointer ${
                     isActive
                       ? 'bg-[#1b1d1f] dark:bg-[#f3f5f7] text-white dark:text-[#1b1d1f]'
                       : 'text-[#5c6064] dark:text-[#9ca1a8] hover:bg-slate-100 dark:hover:bg-[#25282d]'
                   }`}
                 >
                   <Icon className="w-5 h-5" />
-                  <span className="text-[10px] font-medium mt-0.5">{tab.label}</span>
                 </button>
               );
             })}
@@ -89,7 +91,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentScreen, onNavigat
         aria-label="Mobile Navigation"
         className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#1a1b1e]/95 backdrop-blur-md border-t border-[#e6e6e6] dark:border-[#2c2e33] pb-safe"
       >
-        <div className="grid grid-cols-3 h-16 max-w-md mx-auto items-center">
+        <div className="grid grid-cols-4 h-16 max-w-md mx-auto items-center">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = currentScreen === tab.id;

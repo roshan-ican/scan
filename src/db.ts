@@ -1,4 +1,6 @@
 import Dexie, { type Table } from 'dexie';
+import { localDateStr, spendDate } from './lib/expenseQuery.ts';
+import { FALLBACK_CURRENCY } from './lib/money.ts';
 
 export interface ExpenseItem {
   name: string;
@@ -62,8 +64,28 @@ export async function requestPersistentStorage(): Promise<boolean> {
 /**
  * Seed data for development and initial run
  */
-export async function initializeSeedDataIfEmpty(currency = '₹'): Promise<boolean> {
+const SEED_FLAG = 'expense_seed_done';
+
+/**
+ * Seeds sample expenses on the very first run only. Without the flag, deleting every
+ * expense would bring the samples back on the next load (and the voice agent would
+ * answer with fake spending). Settings' "Reset Demo Data" passes force = true.
+ */
+export async function initializeSeedDataIfEmpty(currency = FALLBACK_CURRENCY, force = false): Promise<boolean> {
+  let alreadySeeded = false;
+  try {
+    alreadySeeded = localStorage.getItem(SEED_FLAG) === '1';
+  } catch {
+    // storage unavailable: fall through to the count check
+  }
+  if (alreadySeeded && !force) return false;
+
   const count = await db.expenses.count();
+  try {
+    localStorage.setItem(SEED_FLAG, '1');
+  } catch {
+    // ignore
+  }
   if (count > 0) return false;
 
   const now = new Date();
@@ -72,116 +94,120 @@ export async function initializeSeedDataIfEmpty(currency = '₹'): Promise<boole
 
   // Sample data designed to showcase real month comparison and category breakdown
   // Current month expenses (November)
+  // Sample data (UAE, in the chosen currency) to show the month comparison and category breakdown.
+  // Item lines add up to each receipt total.
   const seedItems: Expense[] = [
     {
-      amount: 450.0,
+      amount: 31.5,
       currency,
       category: 'Food & Dining',
-      merchant: 'Third Wave Coffee',
-      note: 'Pour-over and avocado toast',
+      merchant: 'Tim Hortons',
+      note: 'Iced Capp and Timbits',
       createdAt: new Date(currentYear, currentMonth, now.getDate(), 9, 30).toISOString(),
       source: 'typed',
-      receiptDate: new Date(currentYear, currentMonth, now.getDate()).toISOString().split('T')[0],
+      receiptDate: localDateStr(new Date(currentYear, currentMonth, now.getDate())),
     },
     {
-      amount: 1240.0,
+      amount: 245.75,
       currency,
       category: 'Groceries',
-      merchant: 'Nature\'s Basket',
-      note: 'Weekly essentials and berries',
+      merchant: 'Carrefour',
+      note: 'Weekly groceries',
       createdAt: new Date(currentYear, currentMonth, Math.max(1, now.getDate() - 1), 18, 45).toISOString(),
       source: 'scan',
-      receiptDate: new Date(currentYear, currentMonth, Math.max(1, now.getDate() - 1)).toISOString().split('T')[0],
-      totalLine: 'GRAND TOTAL  1,240.00',
+      receiptDate: localDateStr(new Date(currentYear, currentMonth, Math.max(1, now.getDate() - 1))),
+      totalLine: 'TOTAL INCL. VAT  AED 245.75',
       items: [
-        { name: 'Organic Almonds 500g', amount: 480.0 },
-        { name: 'Fresh Blueberries', amount: 350.0 },
-        { name: 'Greek Yogurt 400g', amount: 190.0 },
-        { name: 'Sourdough Loaf', amount: 220.0 },
+        { name: 'Fresh Strawberries 500g', amount: 24.5 },
+        { name: 'Almarai Laban 2L', amount: 11.25 },
+        { name: 'Basmati Rice 5kg', amount: 54.0 },
+        { name: 'Chicken Breast 1kg', amount: 38.0 },
+        { name: 'Olive Oil 1L', amount: 42.0 },
+        { name: 'Medjool Dates 1kg', amount: 76.0 },
       ],
     },
     {
-      amount: 280.0,
+      amount: 38.0,
       currency,
       category: 'Transport',
-      merchant: 'Uber Auto',
-      note: 'Ride to metro station',
+      merchant: 'Careem',
+      note: 'Ride to the metro',
       createdAt: new Date(currentYear, currentMonth, Math.max(1, now.getDate() - 2), 8, 15).toISOString(),
       source: 'typed',
-      receiptDate: new Date(currentYear, currentMonth, Math.max(1, now.getDate() - 2)).toISOString().split('T')[0],
+      receiptDate: localDateStr(new Date(currentYear, currentMonth, Math.max(1, now.getDate() - 2))),
     },
     {
-      amount: 2199.0,
+      amount: 189.0,
       currency,
       category: 'Shopping',
-      merchant: 'Uniqlo',
-      note: 'AIRism cotton tee and socks',
+      merchant: 'H&M',
+      note: 'T-shirt and socks',
       createdAt: new Date(currentYear, currentMonth, Math.max(1, now.getDate() - 3), 16, 20).toISOString(),
       source: 'scan',
-      receiptDate: new Date(currentYear, currentMonth, Math.max(1, now.getDate() - 3)).toISOString().split('T')[0],
-      totalLine: 'TOTAL INCL. GST  2,199.00',
+      receiptDate: localDateStr(new Date(currentYear, currentMonth, Math.max(1, now.getDate() - 3))),
+      totalLine: 'TOTAL AED 189.00',
       items: [
-        { name: 'AIRism Cotton Crew', amount: 1490.0 },
-        { name: 'Pile Socks 3P', amount: 709.0 },
+        { name: 'Regular Fit T-shirt', amount: 99.0 },
+        { name: 'Socks 5-pack', amount: 90.0 },
       ],
     },
     {
-      amount: 890.0,
+      amount: 412.6,
       currency,
       category: 'Bills & Utilities',
-      merchant: 'Airtel Fiber',
-      note: 'Monthly broadband bill',
+      merchant: 'DEWA',
+      note: 'Electricity and water bill',
       createdAt: new Date(currentYear, currentMonth, Math.max(1, now.getDate() - 4), 11, 0).toISOString(),
       source: 'typed',
-      receiptDate: new Date(currentYear, currentMonth, Math.max(1, now.getDate() - 4)).toISOString().split('T')[0],
+      receiptDate: localDateStr(new Date(currentYear, currentMonth, Math.max(1, now.getDate() - 4))),
     },
     {
-      amount: 540.0,
+      amount: 64.25,
       currency,
       category: 'Health',
-      merchant: 'Apollo Pharmacy',
+      merchant: 'Aster Pharmacy',
       note: 'Vitamins and throat lozenges',
       createdAt: new Date(currentYear, currentMonth, Math.max(1, now.getDate() - 5), 20, 10).toISOString(),
       source: 'scan',
-      receiptDate: new Date(currentYear, currentMonth, Math.max(1, now.getDate() - 5)).toISOString().split('T')[0],
-      totalLine: 'NET AMOUNT PAYABLE  540.00',
+      receiptDate: localDateStr(new Date(currentYear, currentMonth, Math.max(1, now.getDate() - 5))),
+      totalLine: 'NET AMOUNT  AED 64.25',
       items: [
-        { name: 'Zincovit Tablets', amount: 310.0 },
-        { name: 'Strepsils Honey Lemon', amount: 230.0 },
+        { name: 'Vitamin C 1000mg', amount: 42.0 },
+        { name: 'Strepsils Honey Lemon', amount: 22.25 },
       ],
     },
 
-    // Prior month baseline entries (October) to compute comparison
+    // Prior month entries to compare against
     {
-      amount: 650.0,
+      amount: 58.0,
       currency,
       category: 'Food & Dining',
-      merchant: 'Subway',
+      merchant: 'Shake Shack',
       note: 'Quick lunch',
       createdAt: new Date(currentYear, currentMonth - 1, 2, 13, 0).toISOString(),
       source: 'typed',
-      receiptDate: new Date(currentYear, currentMonth - 1, 2).toISOString().split('T')[0],
+      receiptDate: localDateStr(new Date(currentYear, currentMonth - 1, 2)),
     },
     {
-      amount: 980.0,
+      amount: 312.4,
       currency,
       category: 'Groceries',
-      merchant: 'Blinkit',
-      note: 'Pantry items',
+      merchant: 'Spinneys',
+      note: 'Pantry restock',
       createdAt: new Date(currentYear, currentMonth - 1, 4, 17, 30).toISOString(),
       source: 'typed',
-      receiptDate: new Date(currentYear, currentMonth - 1, 4).toISOString().split('T')[0],
+      receiptDate: localDateStr(new Date(currentYear, currentMonth - 1, 4)),
     },
     {
-      amount: 1829.0,
+      amount: 96.0,
       currency,
       category: 'Transport',
-      merchant: 'Airport Cab',
-      note: 'Terminal 2 drop',
+      merchant: 'Dubai Taxi',
+      note: 'Airport drop, Terminal 3',
       createdAt: new Date(currentYear, currentMonth - 1, 5, 6, 0).toISOString(),
       source: 'scan',
-      receiptDate: new Date(currentYear, currentMonth - 1, 5).toISOString().split('T')[0],
-      totalLine: 'TOTAL CHARGED: ₹1,829.00',
+      receiptDate: localDateStr(new Date(currentYear, currentMonth - 1, 5)),
+      totalLine: 'TOTAL FARE  AED 96.00',
     },
   ];
 
@@ -219,7 +245,7 @@ export async function exportExpensesToCsv(): Promise<string> {
 
   const rows = all.map((exp) => {
     const d = new Date(exp.createdAt);
-    const dateStr = exp.receiptDate || d.toISOString().split('T')[0];
+    const dateStr = spendDate(exp);
     const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     return [
       exp.id ?? '',
@@ -259,7 +285,7 @@ export async function importExpensesFromJson(jsonString: string, mode: 'merge' |
     return {
       ...rest,
       amount: Number(rest.amount) || 0,
-      currency: rest.currency || '₹',
+      currency: rest.currency || FALLBACK_CURRENCY,
       category: rest.category || 'Other',
       source: rest.source || 'typed',
       createdAt: rest.createdAt || new Date().toISOString(),

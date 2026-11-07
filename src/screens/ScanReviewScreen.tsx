@@ -1,4 +1,6 @@
 import React, { useState, useRef } from 'react';
+import { localDateStr } from '../lib/expenseQuery.ts';
+import { currencyPrefix } from '../lib/money.ts';
 import type { Expense } from '../db.ts';
 import { resizeImageToJpeg } from '../lib/image.ts';
 import { parseAndValidateScanResult, ValidatedScanResult } from '../lib/scanResult.ts';
@@ -43,7 +45,7 @@ export const ScanReviewScreen: React.FC<ScanReviewScreenProps> = ({
   const [merchant, setMerchant] = useState<string>('');
   const [total, setTotal] = useState<string>('');
   const [detectedCurrency, setDetectedCurrency] = useState<string>(currency);
-  const [dateStr, setDateStr] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [dateStr, setDateStr] = useState<string>(localDateStr(new Date()));
   const [category, setCategory] = useState<string>('Other');
   const [proofLine, setProofLine] = useState<string>('');
   const [items, setItems] = useState<Array<{ name: string; amount: number }>>([]);
@@ -128,31 +130,33 @@ export const ScanReviewScreen: React.FC<ScanReviewScreenProps> = ({
     setTimeout(() => {
       if (sampleType === 'coffee') {
         setThumbnailUrl('/icon.svg');
-        setMerchant('Blue Bottle Coffee');
-        setTotal('18.50');
-        setDetectedCurrency('$');
-        setDateStr(new Date().toISOString().split('T')[0]);
+        setMerchant('Tim Hortons');
+        setTotal('31.50');
+        setDetectedCurrency('AED');
+        setDateStr(localDateStr(new Date()));
         setCategory('Food & Dining');
-        setProofLine('GRAND TOTAL  $18.50');
+        setProofLine('TOTAL AED 31.50');
         setItems([
-          { name: 'Bella Donovan Pour Over', amount: 6.5 },
-          { name: 'Almond Croissant', amount: 5.75 },
-          { name: 'Cold Brew Oat Float', amount: 6.25 },
+          { name: 'Iced Capp Medium', amount: 15.0 },
+          { name: 'Double Double Large', amount: 10.5 },
+          { name: 'Timbits 10 pack', amount: 6.0 },
         ]);
         setStage('review');
       } else {
         setThumbnailUrl('/icon.svg');
-        setMerchant('Organic Market');
-        setTotal('1240.00');
-        setDetectedCurrency('₹');
-        setDateStr(new Date().toISOString().split('T')[0]);
+        setMerchant('Carrefour');
+        setTotal('245.75');
+        setDetectedCurrency('AED');
+        setDateStr(localDateStr(new Date()));
         setCategory('Groceries');
-        setProofLine('NET PAYABLE  ₹1,240.00');
+        setProofLine('TOTAL INCL. VAT  AED 245.75');
         setItems([
-          { name: 'Fresh Strawberries 500g', amount: 380.0 },
-          { name: 'Organic Almond Milk 1L', amount: 260.0 },
-          { name: 'Sourdough Country Loaf', amount: 220.0 },
-          { name: 'Wildflower Honey 300g', amount: 380.0 },
+          { name: 'Fresh Strawberries 500g', amount: 24.5 },
+          { name: 'Almarai Laban 2L', amount: 11.25 },
+          { name: 'Basmati Rice 5kg', amount: 54.0 },
+          { name: 'Chicken Breast 1kg', amount: 38.0 },
+          { name: 'Olive Oil 1L', amount: 42.0 },
+          { name: 'Medjool Dates 1kg', amount: 76.0 },
         ]);
         setStage('review');
       }
@@ -504,7 +508,7 @@ export const ScanReviewScreen: React.FC<ScanReviewScreenProps> = ({
                       <div key={idx} className="flex justify-between items-center py-1 border-b border-slate-100 dark:border-slate-800 last:border-0">
                         <span className="text-[#1b1d1f] dark:text-[#f3f5f7]">{item.name}</span>
                         <span className="font-mono text-[#5c6064] dark:text-[#9ca1a8]">
-                          {detectedCurrency}{item.amount.toFixed(2)}
+                          {currencyPrefix(detectedCurrency)}{item.amount.toFixed(2)}
                         </span>
                       </div>
                     ))}
@@ -526,7 +530,7 @@ export const ScanReviewScreen: React.FC<ScanReviewScreenProps> = ({
             className="w-full h-13 rounded-[12px] bg-[#1b1d1f] dark:bg-white text-white dark:text-[#1b1d1f] font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer shadow-sm disabled:opacity-50"
           >
             <Check className="w-4 h-4" />
-            <span>{isSaving ? 'Saving...' : `Confirm & Save ${detectedCurrency}${total}`}</span>
+            <span>{isSaving ? 'Saving...' : `Confirm & Save ${currencyPrefix(detectedCurrency)}${total}`}</span>
           </button>
 
           <button

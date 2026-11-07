@@ -107,3 +107,10 @@ test('maps fuzzy category names to predefined 9 categories', () => {
   assert.ok(result);
   assert.equal(result.category, 'Transport');
 });
+
+test('maps UAE dirham spellings to AED', () => {
+  for (const cur of ['AED', 'Dhs', 'Dhs.', 'DH', 'د.إ']) {
+    const r = parseAndValidateScanResult({ merchant: 'Carrefour', total: 245.75, currency: cur, category: 'Groceries' }, '$');
+    assert.equal(r?.currency, 'AED', cur);
+  }
+});

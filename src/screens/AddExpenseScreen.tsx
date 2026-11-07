@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { currencyPrefix } from '../lib/money.ts';
 import type { Expense } from '../db.ts';
 import { CATEGORIES } from '../lib/categories.ts';
 import { Keypad } from '../components/Keypad.tsx';
@@ -242,7 +243,7 @@ export const AddExpenseScreen: React.FC<AddExpenseScreenProps> = ({
           }`}
         >
           <Check className="w-4 h-4" />
-          <span>{isSaving ? 'Saving...' : `Save ${currency}${amountStr}`}</span>
+          <span>{isSaving ? 'Saving...' : `Save ${currencyPrefix(currency)}${amountStr}`}</span>
         </button>
       </div>
     </div>

@@ -32,7 +32,7 @@ export interface ValidatedScanResult {
  */
 export function parseAndValidateScanResult(
   raw: any,
-  fallbackCurrency = '₹',
+  fallbackCurrency = 'AED',
   referenceDate = new Date()
 ): ValidatedScanResult | null {
   if (!raw || typeof raw !== 'object') {
@@ -93,7 +93,8 @@ export function parseAndValidateScanResult(
   let currency = fallbackCurrency;
   if (typeof raw.currency === 'string' && raw.currency.trim()) {
     const cur = raw.currency.trim();
-    if (['₹', 'INR', 'Rs', 'Rs.'].includes(cur)) currency = '₹';
+    if (['AED', 'Dhs', 'Dhs.', 'DHS', 'Dh', 'DH', 'د.إ', 'درهم'].includes(cur)) currency = 'AED';
+    else if (['₹', 'INR', 'Rs', 'Rs.'].includes(cur)) currency = '₹';
     else if (['$', 'USD'].includes(cur)) currency = '$';
     else if (['€', 'EUR'].includes(cur)) currency = '€';
     else if (['£', 'GBP'].includes(cur)) currency = '£';

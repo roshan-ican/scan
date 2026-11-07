@@ -6,7 +6,7 @@ Analyze the provided image of a receipt, cash memo, POS slip, or digital invoice
 Your task is to extract:
 1. merchant: The store, restaurant, vendor, or merchant name (null if unreadable).
 2. total: The grand total amount paid after all taxes and discounts. Return as a positive float number (e.g. 1240.50). Return null if missing or illegible. Do not guess.
-3. currency: The detected currency symbol or code (e.g., ₹, INR, $, USD, €, EUR, £, GBP).
+3. currency: The detected currency symbol or code (e.g., AED, Dhs, د.إ, ₹, INR, $, USD, €, EUR, £, GBP).
 4. date: The transaction date in 'YYYY-MM-DD' format as printed on the receipt (null if unreadable or not found).
 5. category: Exactly one of the 9 allowed categories that best fits this purchase:
    - "Food & Dining" (restaurants, cafes, food delivery, fast food, coffee)

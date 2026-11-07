@@ -104,7 +104,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
   const handleResetData = async () => {
     await db.expenses.clear();
-    await initializeSeedDataIfEmpty(currency);
+    await initializeSeedDataIfEmpty(currency, true);
     await onDataChanged();
     setShowResetConfirm(false);
   };
@@ -181,7 +181,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             </div>
             <p className="text-xs text-[#5c6064] dark:text-[#9ca1a8] mt-1 leading-relaxed">
               Your expense history and scan receipts live inside browser IndexedDB on your device.
-              Data never leaves your phone; only receipt images are sent to Gemini for reading.
+              Receipt photos are sent to Gemini to be read, and your expense list is sent only when you use Ask.
             </p>
           </div>
         </div>
